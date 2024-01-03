@@ -1,0 +1,73 @@
+select * from tbl_users
+select * from tbl_archive
+select * from delete_log
+select * from changes_log
+select * from tbl_users
+select * from uploaded_files
+EXPLAIN SELECT * FROM delete_log
+SELECT * FROM delete_log
+
+ALTER TABLE delete_log
+DROP COLUMN contactno;
+DROP COLUMN user_id,
+DROP COLUMN action_type,
+DROP COLUMN profile_name,
+DROP COLUMN group_name,
+DROP COLUMN file_path,
+DROP COLUMN description,
+DROP COLUMN form_a,
+DROP COLUMN form_b,
+DROP COLUMN form_c,
+DROP COLUMN form_d;
+
+ALTER TABLE delete_log
+ADD COLUMN contactno VARCHAR(100);
+ADD COLUMN user_id INTEGER(20),
+ADD COLUMN firstname VARCHAR(100),
+ADD COLUMN lastname VARCHAR(255),
+ADD COLUMN email VARCHAR(255),
+ADD COLUMN gender VARCHAR(255),
+
+ADD COLUMN dob VARCHAR(255),
+ADD COLUMN address VARCHAR(255)
+ADD COLUMN action_type VARCHAR(10);
+
+CREATE OR REPLACE FUNCTION log_archive_delete() RETURNS TRIGGER AS $$
+BEGIN
+    -- Insert the deleted data into the delete_log table
+    INSERT INTO delete_log (user_id, firstname, lastname, action_type, email, gender, contactno, dob, address)
+    VALUES (OLD.id, OLD.firstname, OLD.lastname, 'DELETE', OLD.email, OLD.gender, OLD.contactno, OLD.dob, OLD.address);
+
+    -- Continue with the delete operation
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE VIEW home_page_view AS
+SELECT u.id, u.firstname, u.lastname, u.email, f.profile_name, f.group_name, f.file_path, 
+       f.description, f.form_a, f.form_b, f.form_c, f.form_d, u.reg_datetime, u.updation_date
+FROM tbl_users u
+LEFT JOIN uploaded_files f ON u.id = f.user_id;
+
+
+-- Create roles
+CREATE ROLE admin;
+CREATE ROLE regular_user;
+CREATE ROLE read_only_admin;
+
+
+-- Grant privileges to admin
+GRANT ALL ON ALL TABLES IN SCHEMA public TO admin;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO admin;
+
+-- Grant read-only privileges to regular_user
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO regular_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO regular_user;
+
+-- Grant read-only privileges to read_only_admin
+GRANT USAGE ON SCHEMA public TO read_only_admin;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_only_admin;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO read_only_admin;
+
+select * from pg_roles;

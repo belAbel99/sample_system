@@ -1,0 +1,6 @@
+Kim Palaran17:38
+1. History of programming languages
+2. Programming paradigms
+3. Virtual Machines
+4. Compiled vs. Interpreted
+5. Application  vs. Scripting Languages

@@ -1,0 +1,94 @@
+select * from tbl_users
+select * from uploaded_files
+select * from tbl_archive
+select * from changes_log
+select * from delete_log
+
+ALTER TABLE uploaded_files
+ADD CONSTRAINT user_id
+FOREIGN KEY (user_id)
+REFERENCES tbl_users (id)
+ON DELETE CASCADE;
+
+CREATE OR REPLACE VIEW user_data_view AS
+SELECT u.id, u.email, u.reg_datetime, u.updation_date,
+       f.profile_name, f.group_name, f.file_path, f.description,
+       f.form_a, f.form_b, f.form_c, f.form_d
+FROM tbl_users u
+INNER JOIN uploaded_files f ON u.id = f.user_id;
+
+CREATE TABLE changes_log (
+    log_id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    action_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    action_type VARCHAR(10),
+    profile_name VARCHAR(255),
+    group_name VARCHAR(255),
+    file_path VARCHAR(255),
+    description VARCHAR(255),
+    form_a BOOLEAN,
+    form_b BOOLEAN,
+    form_c BOOLEAN,
+    form_d BOOLEAN
+);
+
+CREATE OR REPLACE FUNCTION log_profile_update()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'UPDATE') THEN
+        INSERT INTO changes_log (user_id, action_type, profile_name, group_name, file_path, description, form_a, form_b, form_c, form_d)
+        VALUES (NEW.user_id, 'UPDATE', NEW.profile_name, NEW.group_name, NEW.file_path, NEW.description, NEW.form_a, NEW.form_b, NEW.form_c, NEW.form_d);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER profile_update_trigger
+AFTER UPDATE ON uploaded_files
+FOR EACH ROW
+EXECUTE FUNCTION log_profile_update();
+
+CREATE TABLE delete_log (
+    log_id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    action_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    action_type VARCHAR(10),
+    profile_name VARCHAR(255),
+    group_name VARCHAR(255),
+    file_path VARCHAR(255),
+    description VARCHAR(255),
+    form_a BOOLEAN,
+    form_b BOOLEAN,
+    form_c BOOLEAN,
+    form_d BOOLEAN
+);
+
+CREATE OR REPLACE FUNCTION log_archive_delete()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        INSERT INTO delete_log (id, firstname, lastname, group_name, file_path, description, form_a, form_b, form_c, form_d)
+        VALUES (OLD.user_id, 'DELETE', OLD.profile_name, OLD.group_name, OLD.file_path, OLD.description, OLD.form_a, OLD.form_b, OLD.form_c, OLD.form_d);
+    END IF;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER archive_delete_trigger
+BEFORE DELETE ON tbl_archive
+FOR EACH ROW
+EXECUTE FUNCTION log_archive_delete();
+
+CREATE OR REPLACE FUNCTION log_archive_delete()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        INSERT INTO delete_log (user_id, action_type, profile_name, group_name, file_path, description, form_a, form_b, form_c, form_d)
+        VALUES (OLD.id, 'DELETE', OLD.firstname, OLD.lastname, NULL, NULL, NULL, NULL, NULL, NULL);
+    END IF;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+

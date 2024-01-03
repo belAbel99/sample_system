@@ -1,0 +1,38 @@
+SELECT DISTINCT p.name AS patient_name
+FROM public.tbl_pat_checkup pc
+JOIN public.tbl_doctors d ON pc.ident_number = d.ident_number
+JOIN public.tbl_pat_entry p ON pc.patient_no = p.patient_no
+WHERE d.name = 'Roberto Sanchez';
+
+
+SELECT
+    pe.name AS patient_name,
+    ad.date AS admission_date,
+    dis.date_discharge AS discharge_date
+FROM
+    public.tbl_pat_admit ad
+JOIN
+    public.tbl_pat_discharge dis
+ON
+    ad.admit_no = dis.admit_no
+JOIN
+    public.tbl_pat_entry pe
+ON
+    ad.admit_no = pe.patient_no
+WHERE
+    ad.date = dis.date_discharge;
+
+
+SELECT
+    d.dep_name AS department_name,
+    COALESCE(string_agg(doctor_name, ', '), 'No doctors assigned') AS doctors_assigned
+FROM
+    public.tbl_department d
+LEFT JOIN
+    (SELECT dep_name, string_agg(name, ', ') AS doctor_name
+     FROM public.tbl_doctors
+     GROUP BY dep_name) doctors
+ON
+    d.dep_name = doctors.dep_name
+GROUP BY
+    d.dep_name;

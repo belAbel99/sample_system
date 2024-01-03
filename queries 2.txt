@@ -1,0 +1,17 @@
+-- Grant INSERT privilege to tbl_users on uploaded_files
+GRANT INSERT ON TABLE uploaded_files TO regular_user;
+-- Revoke INSERT privilege from admin on uploaded_files
+REVOKE INSERT ON TABLE uploaded_files FROM admin;
+
+set roles admin
+
+psql -U admin -d db_sample_system
+
+select * from uploaded_files
+select * from tbl_users
+
+\dp uploaded_files
+
+set role admin
+set role regular_user
+set role postgres

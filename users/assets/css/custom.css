@@ -1,0 +1,48 @@
+.footer p{
+  text-align: center;
+  background-color: rgb(20, 20, 20);
+  color: rgb(255, 255, 255);
+  margin: 0;
+  padding: 30px;
+}
+
+body {
+  background-image: url("../images/background.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed;
+  background-size: 1400px 900px;
+  background-size:cover;
+  -o-background-size:cover;
+  -moz-background-size:cover;
+  -webkit-background-size:cover;
+  }
+
+  .login{
+    background-color: rgba(5, 68, 110, 0.5);
+    color: white;
+    width: 500px;
+  }
+
+  .signup{
+    background-color: rgba(5, 110, 10, 0.5);
+    color: white;
+    width: 500px;
+  }
+
+  .jumbotron{
+    background-color: rgba(9, 123, 158, 0.801);
+  }
+
+  .container1{
+    background-color: rgba(0, 84, 99, 0.733);
+    padding: 10px;
+    width: 600px;
+    color: white;
+  }
+
+  .profile{
+    background-color:  rgba(46, 168, 190, 0.568);
+    width: 600px;
+    color: white;
+  }
